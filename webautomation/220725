@@ -1,0 +1,81 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.alert import Alert
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
+path = "https://www.dpsnnn.com/reserve"
+dpath1 = 'https://www.dpsnnn.com/reserve/?idx='
+dpath2 = '&day=2022-'
+
+times = {9, 10, 11}
+dates = {'07-31'}
+
+# line1 = '/html/body/div[3]/main/div[1]/div[8]/div/div/div/div/div[2]/div/table/tbody/tr/td/div[1]/div/div/div/table/tbody/tr[5]/td['
+# line2 = ']/div/div[3]/div['
+# line3 = ']/a/div/div/span[1]'
+#
+# xpath1 = line1 + str(date) + line2 + str(time) + line3      # 저녁 7시
+# xpath2 = line1 + str(date) + line2 + str(time+1) + line3    # 저녁 8시
+# xpaths = [xpath1, xpath2]
+
+bpaths = [
+    '/html/body/div[3]/main/div/div/div/div/div/div/div/div/div[2]/div[3]/div/a',
+    '/html/body/div[3]/main/div/div/div/div/div/div/div/div/div[2]/div[3]/div/a',
+    '/html/body/div[3]/main/div/div/div/div/div/div/div/div/div[2]/div[3]/div/a',
+
+]
+idpath = '/html/body/div[4]/div/div/article/form/div[1]/div[1]/input'
+pwpath = '/html/body/div[4]/div/div/article/form/div[1]/div[2]/input'
+id = '5ekdmsdldl@gmail.com'
+pw = '8567pop'
+lbpath = '/html/body/div[4]/div/div/article/form/p/button'
+# /html/body/div[4]/div/div/article/form/div[1]/div[1]/input
+
+if __name__ == '__main__':
+    options = webdriver.ChromeOptions()
+    options.add_argument("disable-gpu")
+    options.set_capability('unhandledPromptBehavior', 'accept')
+
+    dc = DesiredCapabilities.CHROME
+    dc['loggingPrefs'] = {'driver': 'OFF', 'server': 'OFF', 'browser': 'OFF'}
+
+    driver = webdriver.Chrome('C:\selenium\chromedriver', chrome_options=options, desired_capabilities=dc)
+
+    i = -1;
+    login = 0
+
+    for date in dates:
+        for time in times:
+            i += 1
+            dpath = dpath1 + str(time) + dpath2 + date
+            driver.get(dpath)
+
+            # click reserve button
+            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, bpaths[i])))
+            ndriver = driver.find_elements(By.XPATH, bpaths[i])
+            if (ndriver):
+                ndriver[0].click()
+                print('clicked reserve button!', i)
+            else : print('failed to catch ticket')
+
+            if(login == 0) : # login
+                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, idpath)))
+
+                ndriver = driver.find_elements(By.XPATH, idpath)
+                ndriver[0].send_keys(id)
+                ndriver = driver.find_elements(By.XPATH, pwpath)
+                ndriver[0].send_keys(pw)
+
+                ndriver = driver.find_elements(By.XPATH, lbpath)
+                if (ndriver):
+                    ndriver[0].click()
+                    print('clicked login button!', i)
+                login = 1
+
+            if(driver.current_url != dpath) :
+                break
+
+    print('end prog')
+    # driver.close()
